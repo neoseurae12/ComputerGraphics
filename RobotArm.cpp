@@ -70,11 +70,16 @@ Shader* FloorShader;
 
 // ObjectModel
 Model* ourObjectModel;
-const char* ourObjectPath = "./teapot.obj";
+//const char* ourObjectPath = "./teapot.obj";
+const char* ourObjectPath = "C:/Users/Wonhui Roh/Documents_eng/CG_Zephyr prac/hw2_3rd trial_files/hw2_last trial_files/Textured_mesh_2_RohWonHui_2076117.obj";	// my code_hw5
+//const char* ourObjectPath = "./hw2_model_myElephant/Textured_mesh_2_RohWonHui_2076117.obj";	// my code_hw5
+
 // translate it so it's at the center of the scene
 // it's a bit too big for our scene, so scale it down
-glm::mat4 objectXform = glm::scale(glm::translate(glm::mat4(1.0f), glm::vec3(0.5f, 0.0f, 0.0f)), glm::vec3(0.08f, 0.08f, 0.08f));
-
+//glm::mat4 objectXform = glm::scale(glm::translate(glm::mat4(1.0f), glm::vec3(0.5f, 0.0f, 0.0f)), glm::vec3(0.08f, 0.08f, 0.08f));
+// my code_hw5
+glm::vec3 scale = glm::vec3(1.0f, 1.0f, 1.0f);
+glm::mat4 objectXform = glm::scale(glm::mat4(), scale);
 
 // HOUSE KEEPING
 void initGL(GLFWwindow** window);
@@ -126,7 +131,7 @@ void myDisplay()
 	objectXform = glm::mat4(1.0f);
 
 	// objectXform's base
-	objectXform = glm::translate(objectXform, glm::vec3(BaseTransX, 0.0f, BaseTransZ));
+	objectXform = glm::translate(objectXform, glm::vec3(BaseTransX+0.18, 0.19f, BaseTransZ));
 	
 	// objectXform's basespin -- problem expect
 	objectXform = glm::rotate(objectXform, BaseSpin * 0.03f, glm::vec3(0.0f, 1.0f, 0.0f));
@@ -209,7 +214,8 @@ void myDisplay()
 
 	objectXform = glm::translate(objectXform, glm::vec3(1.0f, 0.0f, 0.0f));
 
-	objectXform = glm::scale(objectXform, glm::vec3(0.08f, 0.08f, 0.08f));
+	//objectXform = glm::scale(objectXform, glm::vec3(0.08f, 0.08f, 0.08f));
+	objectXform = glm::scale(objectXform, glm::vec3(0.0008f, 0.0008f, 0.0008f));	// mycode_hw5
 
 	DrawObject(objectXform);
 
