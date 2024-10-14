@@ -25,7 +25,7 @@ float WristTwistAng = 10;
 float FingerAng1 = 45;     // 4
 float FingerAng2 = -90;
 
-// my implementation
+// my code
 float TeapotX = 0;	// space (teapot)
 float TeapotZ = 0;
 float Teapot_BaseSpin = 0;
@@ -50,6 +50,9 @@ int RobotControl = 0;
 // settings
 const unsigned int SCR_WIDTH = 768;
 const unsigned int SCR_HEIGHT = 768;
+// hw5_my code	// bookmark
+bool angAttn = false;
+bool angAttnKeyPressed = false;
 
 // camera
 Camera camera(glm::vec3(0.0f, 1.5f, 2.5f), glm::vec3(0.0f, 1.0f, 0.0f), -90.f, -15.0f);
@@ -62,7 +65,7 @@ float deltaTime = 0.0f;	// time between current frame and last frame
 float lastFrame = 0.0f;
 
 // light information
-glm::vec3 lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
+glm::vec3 lightColor = glm::vec3(1.0f, 1.0f, 1.0f);	// hw5_my code - erase	// bookmark
 
 // shader
 Shader* PhongShader;
@@ -70,14 +73,15 @@ Shader* FloorShader;
 
 // ObjectModel
 Model* ourObjectModel;
+// my code
 //const char* ourObjectPath = "./teapot.obj";
 const char* ourObjectPath = "C:/Users/Wonhui Roh/Documents_eng/CG_Zephyr prac/hw2_3rd trial_files/hw2_last trial_files/Textured_mesh_2_RohWonHui_2076117.obj";	// my code_hw5
 //const char* ourObjectPath = "./hw2_model_myElephant/Textured_mesh_2_RohWonHui_2076117.obj";	// my code_hw5
 
 // translate it so it's at the center of the scene
 // it's a bit too big for our scene, so scale it down
-//glm::mat4 objectXform = glm::scale(glm::translate(glm::mat4(1.0f), glm::vec3(0.5f, 0.0f, 0.0f)), glm::vec3(0.08f, 0.08f, 0.08f));
 // my code_hw5
+//glm::mat4 objectXform = glm::scale(glm::translate(glm::mat4(1.0f), glm::vec3(0.5f, 0.0f, 0.0f)), glm::vec3(0.08f, 0.08f, 0.08f));
 glm::vec3 scale = glm::vec3(1.0f, 1.0f, 1.0f);
 glm::mat4 objectXform = glm::scale(glm::mat4(), scale);
 
@@ -91,7 +95,6 @@ void destroyGLPrimitives();
 // CALLBACKS
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
-//void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);	// hw4_my code
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
 void processInput(GLFWwindow* window, int key, int scancode, int action, int mods);
 
@@ -121,7 +124,7 @@ void myDisplay()
 
 	DrawGroundPlane(model);
 
-	// my implementation
+	// my code
 
 	//DrawObject(objectXform);
 
@@ -276,16 +279,65 @@ int main()
 		PhongShader->setMat4("projection", glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f));
 		PhongShader->setMat4("view", camera.GetViewMatrix());
 		PhongShader->setVec3("viewPos", camera.Position);
-		PhongShader->setVec3("lightPos", camera.Position);
+		PhongShader->setVec3("lightPos", camera.Position);	// hw5_my code - erase	// bookmark
+
+		// hw5_my code	// bookmark
+		PhongShader->setInt("angAttn", angAttn); 
+
+		PhongShader->setInt("material.diffuse", 0);
+		PhongShader->setInt("material.specular", 1);
+
+		PhongShader->setVec3("light.position", camera.Position);
+		PhongShader->setVec3("light.direction", camera.Front);	// angular
+		PhongShader->setFloat("light.cutOff", glm::cos(glm::radians(12.5f)));
+		PhongShader->setFloat("light.outerCutOff", glm::cos(glm::radians(17.5f)));
+		//
 
 		FloorShader->use();
 		FloorShader->setMat4("projection", glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f));
 		FloorShader->setMat4("view", camera.GetViewMatrix());
 		FloorShader->setVec3("viewPos", camera.Position);
-		FloorShader->setVec3("lightPos", camera.Position);
+		FloorShader->setVec3("lightPos", camera.Position);	// hw5_my code - erase	// bookmark
+
+		// hw5_my code	// bookmark
+		FloorShader->setInt("angAttn", angAttn); 
+		FloorShader->setInt("material.diffuse", 0);
+		FloorShader->setInt("material.specular", 1);
+		FloorShader->setVec3("light.position", camera.Position);
+		FloorShader->setVec3("light.direction", camera.Front);	// angular
+		FloorShader->setFloat("light.cutOff", glm::cos(glm::radians(12.5f)));
+		FloorShader->setFloat("light.outerCutOff", glm::cos(glm::radians(17.5f)));
+		//
+
+		// hw5_my code	// bookmark
+		// light properties
+		PhongShader->setVec3("light.ambient", 0.1f, 0.1f, 0.1f);
+		// we configure the diffuse intensity slightly higher; the right lighting conditions differ with each lighting method and environment.
+		// each environment and lighting type requires some tweaking to get the best out of your environment.
+		PhongShader->setVec3("light.diffuse", 0.8f, 0.8f, 0.8f);
+		PhongShader->setVec3("light.specular", 1.0f, 1.0f, 1.0f);
+		PhongShader->setFloat("light.constant", 1.0f);
+		PhongShader->setFloat("light.linear", 0.09f);
+		PhongShader->setFloat("light.quadratic", 0.032f);
+
+		FloorShader->setVec3("light.ambient", 0.1f, 0.1f, 0.1f);
+		FloorShader->setVec3("light.diffuse", 0.8f, 0.8f, 0.8f);
+		FloorShader->setVec3("light.specular", 1.0f, 1.0f, 1.0f);
+		FloorShader->setFloat("light.constant", 1.0f);
+		FloorShader->setFloat("light.linear", 0.09f);
+		FloorShader->setFloat("light.quadratic", 0.032f);
+		//
+
+		// hw5_my code	// bookmark
+		// material properties
+		PhongShader->setFloat("material.shininess", 32.0f);
+		FloorShader->setFloat("material.shininess", 32.0f);
+		//
 
 		// render
 		myDisplay();
+
+		std::cout << (angAttn ? "Spot light(rad+ang)" : "Point light(rad)") << std::endl;
 
 		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
 		glfwSwapBuffers(window);
@@ -328,12 +380,8 @@ void initGL(GLFWwindow** window)
 	glfwMakeContextCurrent(*window);
 	glfwSetFramebufferSizeCallback(*window, framebuffer_size_callback);
 	glfwSetCursorPosCallback(*window, mouse_callback);
-	//glfwSetScrollCallback(*window, scroll_callback);
 	glfwSetMouseButtonCallback(*window, mouse_button_callback);
 	glfwSetKeyCallback(*window, processInput);
-
-	// hw4_my code
-	//glfwSetInputMode(*window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);	// cursor not visible
 
 	// glad: load all OpenGL function pointers
 	// ---------------------------------------
@@ -350,11 +398,21 @@ void setupShader()
 	PhongShader->use();
 
 	// Light attributes
-	PhongShader->setVec3("lightColor", lightColor);
+	PhongShader->setVec3("lightColor", lightColor);	// hw5_my code - erase	// bookmark
+	// hw5_my code	// bookmark
+	PhongShader->setVec3("light.ambient", 0.1f, 0.1f, 0.1f);
+	PhongShader->setVec3("light.diffuse", 0.8f, 0.8f, 0.8f);
+	PhongShader->setVec3("light.specular", 1.0f, 1.0f, 1.0f);
+	//
 
 	FloorShader = new Shader("advanced_lighting.vs", "advanced_lighting.fs");
 	FloorShader->use();
-	FloorShader->setVec3("lightColor", lightColor);
+	FloorShader->setVec3("lightColor", lightColor);	// hw5_my code - erase	// bookmark
+	// hw5_my code	// bookmark
+	FloorShader->setVec3("light.ambient", 0.1f, 0.1f, 0.1f);
+	FloorShader->setVec3("light.diffuse", 0.8f, 0.8f, 0.8f);
+	FloorShader->setVec3("light.specular", 1.0f, 1.0f, 1.0f);
+	//
 }
 
 void destroyShader()
@@ -372,8 +430,10 @@ void processInput(GLFWwindow* window, int key, int scancode, int action, int mod
 		RobotControl = key - GLFW_KEY_1;
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, true);
+
+	// my code
 	if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
-		toggleOdd = !toggleOdd;	// my implementation
+		toggleOdd = !toggleOdd;	
 
 	// hw4_my code
 	float cameraSpeed = static_cast<float>(6.0 * deltaTime);
@@ -385,6 +445,17 @@ void processInput(GLFWwindow* window, int key, int scancode, int action, int mod
 		camera.ProcessKeyboard(LEFT, cameraSpeed);
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
 		camera.ProcessKeyboard(RIGHT, cameraSpeed);
+
+	// hw5_my code	// bookmark
+	if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS && !angAttnKeyPressed)
+	{
+		angAttn = !angAttn;
+		angAttnKeyPressed = true;
+	}
+	if (glfwGetKey(window, GLFW_KEY_L) == GLFW_RELEASE)
+	{
+		angAttnKeyPressed = false;
+	}
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
@@ -431,28 +502,28 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 		{
 		case 0: 
 			BaseTransX += xoffset; BaseTransZ -= yoffset;
-			// my implementation
+			// my code
 			if (toggleOdd) {
 				TeapotX += xoffset; TeapotZ -= yoffset;
 			}
 			break;
 		case 1: 
 			BaseSpin += xoffset * 180 ;
-			// my implementation
+			// my code
 			if (toggleOdd) {
 				Teapot_BaseSpin += xoffset * 180;
 			}
 			break;
 		case 2: 
 			ShoulderAng += yoffset   * -90; ElbowAng += xoffset  * 90; 
-			// my implementation
+			// my code
 			if (toggleOdd) {
 				Teapot_ShoulderAng += yoffset * -90; Teapot_ElbowAng += xoffset * 90;
 			}
 			break;
 		case 3: 
 			WristAng += yoffset  * -180; WristTwistAng += xoffset  * 180; 
-			// my implementation
+			// my code
 			if (toggleOdd) {
 				Teapot_WristAng += yoffset * -180; Teapot_WristTwistAng += xoffset * 180;
 			}
@@ -464,12 +535,6 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 	} 
 	
 }
-
-// hw4_my code
-//void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
-//{
-//	camera.ProcessMouseScroll((float) yoffset);
-//}
 
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 {
@@ -821,7 +886,7 @@ unsigned int loadTexture(char const* path)
 Plane::Plane()
 {
 	float data[] = {
-		// positions           // normals          // texcoords
+		// positions           // normals          // coords
 		-10.0f, 0.0f, -10.0f,  0.0f, 1.0f,  0.0f,  0.0f,  0.0f,
 		 10.0f, 0.0f, -10.0f,  0.0f, 1.0f,  0.0f,  10.0f, 0.0f,
 		 10.0f, 0.0f,  10.0f,  0.0f, 1.0f,  0.0f,  10.0f, 10.0f,
